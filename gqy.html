@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>身份验证系统</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: Arial, "Microsoft YaHei", sans-serif;
+}
+
+/* =========================
+   登录页面
+========================= */
+
+body {
+    background: #0b0d12;
+    color: white;
+}
+
+.login-page {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background:
+        radial-gradient(circle at center, #20242c 0%, #0b0d12 60%);
+    transition: opacity 1s;
+}
+
+.login-box {
+    width: 360px;
+    padding: 45px 40px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 12px;
+    box-shadow: 0 20px 80px rgba(0,0,0,0.5);
+    backdrop-filter: blur(20px);
+}
+
+.login-box h1 {
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 10px;
+    letter-spacing: 4px;
+}
+
+.subtitle {
+    text-align: center;
+    color: #888;
+    font-size: 12px;
+    margin-bottom: 30px;
+}
+
+.input {
+    width: 100%;
+    height: 45px;
+    margin-bottom: 15px;
+    padding: 0 15px;
+    border: 1px solid #333;
+    border-radius: 6px;
+    background: #11141a;
+    color: white;
+    outline: none;
+}
+
+.input:focus {
+    border-color: #777;
+}
+
+.login-btn {
+    width: 100%;
+    height: 45px;
+    border: none;
+    border-radius: 6px;
+    background: #eeeeee;
+    color: #111;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.login-btn:hover {
+    background: white;
+    transform: translateY(-2px);
+}
+
+.error {
+    height: 20px;
+    margin-top: 15px;
+    text-align: center;
+    color: #ff4d4d;
+    font-size: 13px;
+}
+
+
+/* =========================
+   主舞台
+========================= */
+
+.main-page {
+    position: fixed;
+    inset: 0;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    background: #000;
+    overflow: hidden;
+}
+
+.main-page.active {
+    display: flex;
+}
+
+
+/* 彩色光幕 */
+
+.light {
+    position: absolute;
+    width: 80vw;
+    height: 80vw;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0;
+}
+
+.light1 {
+    background: #ff00cc;
+}
+
+.light2 {
+    background: #00ffff;
+}
+
+.light3 {
+    background: #ffff00;
+}
+
+
+/* =========================
+   高秦一名字
+========================= */
+
+.name {
+    position: relative;
+    z-index: 10;
+
+    font-size: clamp(70px, 16vw, 220px);
+    font-weight: 900;
+
+    color: white;
+
+    opacity: 0;
+
+    transform:
+        scale(0.05)
+        rotate(-180deg);
+
+    text-align: center;
+
+    background: linear-gradient(
+        90deg,
+        #ff0055,
+        #ff9900,
+        #ffff00,
+        #00ff99,
+        #00ccff,
+        #6633ff,
+        #ff00cc
+    );
+
+    background-size: 400% 400%;
+
+    -webkit-background-clip: text;
+    background-clip: text;
+
+    -webkit-text-fill-color: transparent;
+
+    filter:
+        drop-shadow(0 0 10px #ff00cc)
+        drop-shadow(0 0 30px #00ffff);
+}
+
+
+/* 登场动画 */
+
+.show-name {
+    animation:
+        nameAppear 2.5s cubic-bezier(.12,.8,.25,1) forwards,
+        rainbow 2s linear infinite 2.5s,
+        nameFloat 2s ease-in-out infinite 2.5s;
+}
+
+@keyframes nameAppear {
+
+    0% {
+        opacity: 0;
+        transform:
+            scale(0.05)
+            rotate(-720deg);
+    }
+
+    50% {
+        opacity: 1;
+    }
+
+    75% {
+        transform:
+            scale(1.3)
+            rotate(20deg);
+    }
+
+    100% {
+        opacity: 1;
+        transform:
+            scale(1)
+            rotate(0deg);
+    }
+}
+
+@keyframes rainbow {
+
+    0% {
+        background-position: 0% 50%;
+    }
+
+    50% {
+        background-position: 100% 50%;
+    }
+
+    100% {
+        background-position: 0% 50%;
+    }
+}
+
+@keyframes nameFloat {
+
+    0%,100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+}
+
+
+/* 光幕动画 */
+
+.light-show {
+    animation: lightExplosion 2.5s ease-out forwards;
+}
+
+@keyframes lightExplosion {
+
+    0% {
+        opacity: 0;
+        transform: scale(0.1);
+    }
+
+    30% {
+        opacity: 0.8;
+        transform: scale(1);
+    }
+
+    100% {
+        opacity: 0.25;
+        transform: scale(2);
+    }
+}
+
+
+/* =========================
+   点击提示
+========================= */
+
+.click-text {
+    position: absolute;
+    bottom: 60px;
+    z-index: 20;
+
+    font-size: 18px;
+    color: white;
+
+    opacity: 0;
+
+    animation: fadeIn 2s forwards 3s;
+
+    cursor: pointer;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+    }
+}
+
+
+/* =========================
+   粒子
+========================= */
+
+.particle {
+    position: absolute;
+
+    width: 8px;
+    height: 8px;
+
+    border-radius: 50%;
+
+    background: white;
+
+    pointer-events: none;
+
+    animation: explode 1.5s ease-out forwards;
+}
+
+@keyframes explode {
+
+    from {
+        transform:
+            translate(0,0)
+            scale(1);
+
+        opacity: 1;
+    }
+
+    to {
+        transform:
+            translate(var(--x), var(--y))
+            scale(0);
+
+        opacity: 0;
+    }
+}
+
+
+/* =========================
+   最终处刑
+========================= */
+
+.final {
+    position: fixed;
+    inset: 0;
+
+    display: none;
+
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+    z-index: 100;
+
+    background:
+        radial-gradient(
+            circle,
+            #700000,
+            #120000 70%
+        );
+
+    text-align: center;
+}
+
+.final.active {
+    display: flex;
+    animation: redFlash 0.15s infinite alternate;
+}
+
+.final h1 {
+    font-size: clamp(45px, 10vw, 130px);
+    font-weight: 900;
+
+    color: white;
+
+    text-shadow:
+        0 0 10px red,
+        0 0 30px red,
+        0 0 70px red;
+
+    animation: finalShake 0.08s infinite;
+}
+
+.final h2 {
+    margin-top: 30px;
+
+    font-size: clamp(30px, 6vw, 80px);
+
+    color: #ff2222;
+
+    text-shadow: 0 0 30px red;
+}
+
+@keyframes finalShake {
+
+    0% {
+        transform: translate(3px,2px);
+    }
+
+    25% {
+        transform: translate(-3px,-2px);
+    }
+
+    50% {
+        transform: translate(2px,-3px);
+    }
+
+    75% {
+        transform: translate(-2px,3px);
+    }
+
+    100% {
+        transform: translate(3px,-2px);
+    }
+}
+
+@keyframes redFlash {
+
+    from {
+        background-color: #180000;
+    }
+
+    to {
+        background-color: #400000;
+    }
+}
+
+</style>
+</head>
+
+
+<body>
+
+
+<!-- =========================
+     登录页面
+========================= -->
+
+<div class="login-page" id="loginPage">
+
+    <div class="login-box">
+
+        <h1>身份验证系统</h1>
+
+        <div class="subtitle">
+            AUTHENTICATION SYSTEM
+        </div>
+
+        <input
+            class="input"
+            id="username"
+            placeholder="请输入用户名"
+        >
+
+        <input
+            class="input"
+            id="password"
+            type="password"
+            placeholder="请输入访问密码"
+        >
+
+        <button
+            class="login-btn"
+            onclick="login()"
+        >
+            登 录
+        </button>
+
+        <div class="error" id="error"></div>
+
+    </div>
+
+</div>
+
+
+<!-- =========================
+     主舞台
+========================= -->
+
+<div class="main-page" id="mainPage">
+
+    <div class="light light1"></div>
+    <div class="light light2"></div>
+    <div class="light light3"></div>
+
+    <div
+        class="name"
+        id="name"
+    >
+        高秦一
+    </div>
+
+    <div
+        class="click-text"
+        onclick="finalAttack()"
+    >
+        点击屏幕继续
+    </div>
+
+</div>
+
+
+<!-- =========================
+     最终页面
+========================= -->
+
+<div class="final" id="final">
+
+    <h1>怎敢直视圣上！</h1>
+
+    <h2>拖出去处死！</h2>
+
+</div>
+
+
+
+<script>
+
+/* =========================
+   登录
+========================= */
+
+function login() {
+
+    const password =
+        document.getElementById("password").value;
+
+    const error =
+        document.getElementById("error");
+
+    if (password !== "gaoqinyu") {
+
+        error.innerText =
+            "密码错误，请重新输入";
+
+        return;
+    }
+
+
+    /* 登录成功 */
+
+    const loginPage =
+        document.getElementById("loginPage");
+
+    const mainPage =
+        document.getElementById("mainPage");
+
+    loginPage.style.opacity = "0";
+
+    setTimeout(() => {
+
+        loginPage.style.display = "none";
+
+        mainPage.classList.add("active");
+
+        startShow();
+
+    }, 1000);
+}
+
+
+
+/* =========================
+   圣上登场
+========================= */
+
+function startShow() {
+
+    const lights =
+        document.querySelectorAll(".light");
+
+    const name =
+        document.getElementById("name");
+
+
+    lights.forEach((light, index) => {
+
+        setTimeout(() => {
+
+            light.classList.add("light-show");
+
+        }, index * 250);
+
+    });
+
+
+    setTimeout(() => {
+
+        name.classList.add("show-name");
+
+        createParticles();
+
+    }, 300);
+
+}
+
+
+
+/* =========================
+   粒子爆炸
+========================= */
+
+function createParticles() {
+
+    const main =
+        document.getElementById("mainPage");
+
+    for (let i = 0; i < 180; i++) {
+
+        const particle =
+            document.createElement("div");
+
+        particle.className =
+            "particle";
+
+
+        particle.style.left =
+            "50%";
+
+        particle.style.top =
+            "50%";
+
+
+        const angle =
+            Math.random() * Math.PI * 2;
+
+        const distance =
+            200 + Math.random() * 800;
+
+
+        const x =
+            Math.cos(angle) * distance;
+
+        const y =
+            Math.sin(angle) * distance;
+
+
+        particle.style.setProperty(
+            "--x",
+            x + "px"
+        );
+
+        particle.style.setProperty(
+            "--y",
+            y + "px"
+        );
+
+
+        const size =
+            3 + Math.random() * 10;
+
+        particle.style.width =
+            size + "px";
+
+        particle.style.height =
+            size + "px";
+
+
+        main.appendChild(particle);
+
+
+        setTimeout(() => {
+
+            particle.remove();
+
+        }, 1600);
+
+    }
+
+}
+
+
+
+/* =========================
+   最终攻击
+========================= */
+
+function finalAttack() {
+
+    const final =
+        document.getElementById("final");
+
+    final.classList.add("active");
+
+}
+
+</script>
+
+</body>
+  </html>
