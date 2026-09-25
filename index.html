@@ -1,4 +1,1143 @@
-<
-<div class="line"></div>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>王国对决</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+body {
+    margin: 0;
+    background: #111827;
+    color: white;
+    font-family: Arial, "Microsoft YaHei", sans-serif;
+    overflow-x: hidden;
+}
+
+#game {
+    width: min(100vw, 520px);
+    margin: auto;
+    min-height: 100vh;
+    background: #182235;
+    position: relative;
+}
+
+.topbar {
+    height: 58px;
+    background: #202c42;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 12px;
+    border-bottom: 2px solid #334155;
+}
+
+.title {
+    font-size: 19px;
+    font-weight: bold;
+}
+
+.timer {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.elixirBox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.elixir {
+    width: 120px;
+    height: 18px;
+    background: #111827;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 2px solid #64748b;
+}
+
+.elixirFill {
+    height: 100%;
+    width: 50%;
+    background: linear-gradient(90deg,#a855f7,#ec4899);
+}
+
+.elixirText {
+    font-weight: bold;
+    color: #e879f9;
+}
+
+#arena {
+    position: relative;
+    width: 100%;
+    height: 620px;
+    overflow: hidden;
+    background:
+        linear-gradient(#83c76b 0 45%, #3d9ac5 45% 55%, #83c76b 55%);
+}
+
+#arena::before,
+#arena::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 8px;
+    background: rgba(255,255,255,.15);
+}
+
+#arena::before {
+    top: 45%;
+}
+
+#arena::after {
+    top: 55%;
+}
+
+.bridge {
+    position: absolute;
+    width: 88px;
+    height: 70px;
+    top: calc(50% - 35px);
+    background: #b88652;
+    border-left: 7px solid #7c5835;
+    border-right: 7px solid #7c5835;
+    z-index: 1;
+}
+
+.bridge.left {
+    left: 18%;
+}
+
+.bridge.right {
+    right: 18%;
+}
+
+.tower {
+    position: absolute;
+    width: 72px;
+    height: 82px;
+    border-radius: 12px;
+    border: 4px solid #334155;
+    background: #e5e7eb;
+    color: #111827;
+    text-align: center;
+    padding-top: 7px;
+    z-index: 5;
+    box-shadow: 0 4px 10px rgba(0,0,0,.35);
+}
+
+.tower .towerIcon {
+    font-size: 30px;
+}
+
+.tower .hp {
+    font-size: 11px;
+    font-weight: bold;
+    margin-top: 2px;
+}
+
+.playerTower {
+    bottom: 18px;
+}
+
+.enemyTower {
+    top: 18px;
+}
+
+.kingTower {
+    left: calc(50% - 36px);
+}
+
+.leftTower {
+    left: 9%;
+}
+
+.rightTower {
+    right: 9%;
+}
+
+.enemyTower {
+    background: #fecaca;
+}
+
+.playerTower {
+    background: #bfdbfe;
+}
+
+.hpbar {
+    position: absolute;
+    left: 5%;
+    width: 90%;
+    height: 7px;
+    background: #111827;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.hpbar div {
+    height: 100%;
+    width: 100%;
+    background: #22c55e;
+}
+
+.unit {
+    position: absolute;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    z-index: 10;
+    transform: translate(-50%,-50%);
+    border: 3px solid white;
+    box-shadow: 0 3px 8px rgba(0,0,0,.5);
+}
+
+.playerUnit {
+    background: #2563eb;
+}
+
+.enemyUnit {
+    background: #dc2626;
+}
+
+#deployArea {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 48%;
+    z-index: 20;
+}
+
+#deployHint {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 7px 12px;
+    border-radius: 15px;
+    background: rgba(0,0,0,.45);
+    font-size: 12px;
+    pointer-events: none;
+}
+
+.hand {
+    display: grid;
+    grid-template-columns: repeat(4,1fr);
+    gap: 7px;
+    padding: 8px;
+    background: #202c42;
+}
+
+.card {
+    min-height: 92px;
+    background: linear-gradient(#475569,#1e293b);
+    border: 2px solid #64748b;
+    border-radius: 10px;
+    position: relative;
+    padding: 5px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.card.selected {
+    border-color: #facc15;
+    transform: translateY(-5px);
+}
+
+.card.disabled {
+    opacity: .45;
+}
+
+.cardIcon {
+    font-size: 30px;
+}
+
+.cardName {
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.cost {
+    position: absolute;
+    left: 4px;
+    top: 4px;
+    background: #a855f7;
+    width: 21px;
+    height: 21px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.info {
+    padding: 8px 10px 14px;
+    background: #111827;
+    font-size: 12px;
+    color: #cbd5e1;
+}
+
+#message {
+    position: absolute;
+    top: 48%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    z-index: 100;
+    padding: 18px 30px;
+    background: rgba(15,23,42,.95);
+    border: 2px solid #facc15;
+    border-radius: 15px;
+    font-size: 25px;
+    font-weight: bold;
+    display: none;
+    text-align: center;
+}
+
+#restart {
+    margin-top: 15px;
+    padding: 10px 25px;
+    border: 0;
+    border-radius: 10px;
+    background: #facc15;
+    color: #111827;
+    font-weight: bold;
+}
+
+@media(max-width:380px) {
+    .card {
+        min-height: 82px;
+    }
+
+    .cardIcon {
+        font-size: 25px;
+    }
+
+    #arena {
+        height: 570px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div id="game">
+
+    <div class="topbar">
+        <div class="title">⚔️ 王国对决</div>
+        <div class="timer" id="timer">03:00</div>
+        <div class="elixirBox">
+            <div class="elixir">
+                <div class="elixirFill" id="elixirFill"></div>
+            </div>
+            <div class="elixirText" id="elixirText">5</div>
+        </div>
+    </div>
+
+    <div id="arena">
+
+        <div class="bridge left"></div>
+        <div class="bridge right"></div>
+
+        <!-- 敌方皇家塔 -->
+        <div class="tower enemyTower kingTower"
+             id="enemyKing">
+            <div class="towerIcon">👑</div>
+            <div>皇家塔</div>
+            <div class="hp" id="enemyKingHpText">3000</div>
+            <div class="hpbar">
+                <div id="enemyKingHp"></div>
+            </div>
+        </div>
+
+        <!-- 敌方公主塔 -->
+        <div class="tower enemyTower leftTower"
+             id="enemyLeft">
+            <div class="towerIcon">🏰</div>
+            <div>公主塔</div>
+            <div class="hp" id="enemyLeftHpText">1800</div>
+            <div class="hpbar">
+                <div id="enemyLeftHp"></div>
+            </div>
+        </div>
+
+        <div class="tower enemyTower rightTower"
+             id="enemyRight">
+            <div class="towerIcon">🏰</div>
+            <div>公主塔</div>
+            <div class="hp" id="enemyRightHpText">1800</div>
+            <div class="hpbar">
+                <div id="enemyRightHp"></div>
+            </div>
+        </div>
+
+        <!-- 我方皇家塔 -->
+        <div class="tower playerTower kingTower"
+             id="playerKing">
+            <div class="towerIcon">👑</div>
+            <div>皇家塔</div>
+            <div class="hp" id="playerKingHpText">3000</div>
+            <div class="hpbar">
+                <div id="playerKingHp"></div>
+            </div>
+        </div>
+
+        <div class="tower playerTower leftTower"
+             id="playerLeft">
+            <div class="towerIcon">🏰</div>
+            <div>公主塔</div>
+            <div class="hp" id="playerLeftHpText">1800</div>
+            <div class="hpbar">
+                <div id="playerLeftHp"></div>
+            </div>
+        </div>
+
+        <div class="tower playerTower rightTower"
+             id="playerRight">
+            <div class="towerIcon">🏰</div>
+            <div>公主塔</div>
+            <div class="hp" id="playerRightHpText">1800</div>
+            <div class="hpbar">
+                <div id="playerRightHp"></div>
+            </div>
+        </div>
+
+        <div id="units"></div>
+
+        <div id="deployArea">
+            <div id="deployHint">选择卡牌后点击下方战场部署</div>
+        </div>
+
+        <div id="message">
+            <div id="resultText"></div>
+            <button id="restart">重新开始</button>
+        </div>
+
+    </div>
+
+    <div class="hand" id="hand"></div>
+
+    <div class="info">
+        💡 选择卡牌 → 点击下半场部署。单位会自动寻找敌人并攻击。
+    </div>
+
+</div>
+
+<script>
+
+const cards = {
+
+    knight: {
+        name:"骑士",
+        icon:"⚔️",
+        cost:3,
+        hp:900,
+        damage:110,
+        range:35,
+        speed:0.55,
+        attackSpeed:900,
+        target:"ground"
+    },
+
+    archer: {
+        name:"弓箭手",
+        icon:"🏹",
+        cost:3,
+        hp:420,
+        damage:80,
+        range:145,
+        speed:0.45,
+        attackSpeed:1000,
+        target:"ground"
+    },
+
+    giant: {
+        name:"巨人",
+        icon:"🗿",
+        cost:5,
+        hp:1800,
+        damage:170,
+        range:40,
+        speed:0.32,
+        attackSpeed:1200,
+        target:"tower"
+    },
+
+    goblin: {
+        name:"哥布林",
+        icon:"👺",
+        cost:2,
+        hp:300,
+        damage:75,
+        range:30,
+        speed:0.85,
+        attackSpeed:700,
+        target:"ground"
+    },
+
+    mage: {
+        name:"法师",
+        icon:"🧙",
+        cost:4,
+        hp:600,
+        damage:130,
+        range:125,
+        speed:0.4,
+        attackSpeed:1200,
+        target:"ground"
+    },
+
+    tank: {
+        name:"重甲卫士",
+        icon:"🛡️",
+        cost:4,
+        hp:1200,
+        damage:120,
+        range:35,
+        speed:0.38,
+        attackSpeed:1000,
+        target:"ground"
+    },
+
+    fireball: {
+        name:"火球",
+        icon:"🔥",
+        cost:4,
+        spell:true,
+        damage:500
+    },
+
+    lightning: {
+        name:"雷击",
+        icon:"⚡",
+        cost:5,
+        spell:true,
+        damage:650
+    }
+};
+
+let deck = [
+    "knight",
+    "archer",
+    "giant",
+    "goblin"
+];
+
+let enemyDeck = [
+    "knight",
+    "archer",
+    "giant",
+    "mage"
+];
+
+let selectedCard = null;
+
+let playerElixir = 5;
+let enemyElixir = 5;
+
+let maxElixir = 10;
+
+let gameTime = 180;
+
+let gameOver = false;
+
+let units = [];
+
+let nextUnitId = 1;
+
+const towerData = {
+
+    playerKing:{hp:3000,max:3000},
+    playerLeft:{hp:1800,max:1800},
+    playerRight:{hp:1800,max:1800},
+
+    enemyKing:{hp:3000,max:3000},
+    enemyLeft:{hp:1800,max:1800},
+    enemyRight:{hp:1800,max:1800}
+};
+
+function renderHand(){
+
+    const hand = document.getElementById("hand");
+
+    hand.innerHTML = "";
+
+    deck.forEach(id=>{
+
+        const c = cards[id];
+
+        const div = document.createElement("div");
+
+        div.className = "card";
+
+        if(playerElixir < c.cost){
+            div.classList.add("disabled");
+        }
+
+        div.innerHTML = `
+            <div class="cost">${c.cost}</div>
+            <div class="cardIcon">${c.icon}</div>
+            <div class="cardName">${c.name}</div>
+        `;
+
+        div.onclick = ()=>{
+
+            if(gameOver) return;
+
+            if(playerElixir < c.cost) return;
+
+            selectedCard = id;
+
+            document.querySelectorAll(".card")
+                .forEach(x=>x.classList.remove("selected"));
+
+            div.classList.add("selected");
+
+            document.getElementById("deployHint")
+                .textContent = "点击下方战场部署 " + c.name;
+        };
+
+        hand.appendChild(div);
+    });
+
+}
+
+function spawnUnit(type, owner, x, y){
+
+    const c = cards[type];
+
+    const unit = {
+
+        id:nextUnitId++,
+
+        type,
+
+        owner,
+
+        x,
+
+        y,
+
+        hp:c.hp,
+
+        maxHp:c.hp,
+
+        lastAttack:0,
+
+        target:null,
+
+        element:null
+    };
+
+    const el = document.createElement("div");
+
+    el.className =
+        "unit " +
+        (owner==="player" ? "playerUnit" : "enemyUnit");
+
+    el.textContent = c.icon;
+
+    document.getElementById("units").appendChild(el);
+
+    unit.element = el;
+
+    units.push(unit);
+
+    return unit;
+}
+
+function deployPlayer(type,x,y){
+
+    const c = cards[type];
+
+    if(playerElixir < c.cost) return;
+
+    playerElixir -= c.cost;
+
+    if(c.spell){
+
+        castSpell(type,x,y);
+
+    }else{
+
+        spawnUnit(type,"player",x,y);
+
+    }
+
+    selectedCard = null;
+
+    document.querySelectorAll(".card")
+        .forEach(x=>x.classList.remove("selected"));
+
+    updateUI();
+}
+
+function castSpell(type,x,y){
+
+    const c = cards[type];
+
+    units.forEach(u=>{
+
+        if(u.owner==="enemy"){
+
+            const dx=u.x-x;
+            const dy=u.y-y;
+
+            if(Math.sqrt(dx*dx+dy*dy)<80){
+
+                u.hp -= c.damage;
+
+            }
+
+        }
+
+    });
+
+    const target =
+        Math.random()<0.5
+        ? "enemyLeft"
+        : "enemyRight";
+
+    towerData[target].hp -= c.damage * 0.4;
+
+    updateTowers();
+}
+
+document.getElementById("deployArea")
+.addEventListener("click",function(e){
+
+    if(!selectedCard || gameOver) return;
+
+    const rect =
+        document.getElementById("arena")
+        .getBoundingClientRect();
+
+    const x =
+        e.clientX - rect.left;
+
+    const y =
+        e.clientY - rect.top;
+
+    if(y < rect.height * .53) return;
+
+    deployPlayer(selectedCard,x,y);
+
+});
+
+function distance(a,b){
+
+    const dx=a.x-b.x;
+    const dy=a.y-b.y;
+
+    return Math.sqrt(dx*dx+dy*dy);
+}
+
+function findTarget(unit){
+
+    let candidates = [];
+
+    if(unit.owner==="player"){
+
+        candidates =
+            units.filter(u=>u.owner==="enemy");
+
+    }else{
+
+        candidates =
+            units.filter(u=>u.owner==="player");
+
+    }
+
+    if(candidates.length===0) return null;
+
+    let nearest = candidates[0];
+
+    candidates.forEach(u=>{
+
+        if(distance(unit,u)<distance(unit,nearest)){
+
+            nearest=u;
+
+        }
+
+    });
+
+    return nearest;
+}
+
+function getEnemyTower(unit){
+
+    let towers;
+
+    if(unit.owner==="player"){
+
+        towers=[
+            ["enemyLeft",110,70],
+            ["enemyRight",410,70],
+            ["enemyKing",260,70]
+        ];
+
+    }else{
+
+        towers=[
+            ["playerLeft",110,550],
+            ["playerRight",410,550],
+            ["playerKing",260,550]
+        ];
+
+    }
+
+    let nearest = towers[0];
+
+    towers.forEach(t=>{
+
+        const d =
+            Math.abs(unit.x-t[1]) +
+            Math.abs(unit.y-t[2]);
+
+        const nd =
+            Math.abs(unit.x-nearest[1]) +
+            Math.abs(unit.y-nearest[2]);
+
+        if(d<nd) nearest=t;
+
+    });
+
+    return nearest;
+}
+
+function attackUnit(attacker,target,now){
+
+    const c=cards[attacker.type];
+
+    if(now-attacker.lastAttack < c.attackSpeed)
+        return;
+
+    target.hp -= c.damage;
+
+    attacker.lastAttack=now;
+}
+
+function attackTower(unit,towerId,now){
+
+    const c=cards[unit.type];
+
+    if(now-unit.lastAttack<c.attackSpeed)
+        return;
+
+    towerData[towerId].hp -= c.damage;
+
+    unit.lastAttack=now;
+
+    updateTowers();
+}
+
+function updateUnits(now){
+
+    units.forEach(unit=>{
+
+        const c=cards[unit.type];
+
+        if(unit.hp<=0) return;
+
+        const enemy=findTarget(unit);
+
+        if(enemy && c.target!=="tower"){
+
+            const d=distance(unit,enemy);
+
+            if(d<=c.range){
+
+                attackUnit(unit,enemy,now);
+
+            }else{
+
+                moveToward(unit,enemy,c.speed);
+
+            }
+
+        }else{
+
+            const tower=getEnemyTower(unit);
+
+            const target={
+                x:tower[1],
+                y:tower[2]
+            };
+
+            const d=distance(unit,target);
+
+            if(d<55){
+
+                attackTower(unit,tower[0],now);
+
+            }else{
+
+                moveToward(unit,target,c.speed);
+
+            }
+
+        }
+
+        unit.element.style.left=unit.x+"px";
+        unit.element.style.top=unit.y+"px";
+
+    });
+
+    units = units.filter(u=>{
+
+        if(u.hp<=0){
+
+            u.element.remove();
+
+            return false;
+
+        }
+
+        return true;
+
+    });
+
+}
+
+function moveToward(unit,target,speed){
+
+    const dx=target.x-unit.x;
+    const dy=target.y-unit.y;
+
+    const len=Math.sqrt(dx*dx+dy*dy);
+
+    if(len===0)return;
+
+    unit.x += dx/len*speed;
+    unit.y += dy/len*speed;
+
+    unit.x=Math.max(20,Math.min(500,unit.x));
+    unit.y=Math.max(20,Math.min(600,unit.y));
+}
+
+let aiTimer=0;
+
+function aiTurn(){
+
+    if(gameOver) return;
+
+    enemyElixir=Math.min(
+        maxElixir,
+        enemyElixir+0.8
+    );
+
+    if(enemyElixir<2) return;
+
+    if(Math.random()<0.035){
+
+        const type=
+            enemyDeck[
+                Math.floor(
+                    Math.random()*enemyDeck.length
+                )
+            ];
+
+        const c=cards[type];
+
+        if(enemyElixir<c.cost)return;
+
+        enemyElixir-=c.cost;
+
+        if(c.spell){
+
+            const target=
+                units.find(u=>u.owner==="player");
+
+            if(target){
+
+                target.hp-=c.damage;
+
+            }
+
+        }else{
+
+            const x =
+                Math.random()<0.5
+                ? 100+Math.random()*80
+                : 340+Math.random()*80;
+
+            const y=100+Math.random()*120;
+
+            spawnUnit(type,"enemy",x,y);
+
+        }
+
+    }
+
+}
+
+function updateTowers(){
+
+    Object.keys(towerData).forEach(id=>{
+
+        const t=towerData[id];
+
+        t.hp=Math.max(0,t.hp);
+
+        const text=
+            document.getElementById(id+"HpText");
+
+        const bar=
+            document.getElementById(id+"Hp");
+
+        if(text)
+            text.textContent=Math.round(t.hp);
+
+        if(bar)
+            bar.style.width =
+                Math.max(0,t.hp/t.max*100)+"%";
+
+    });
+
+    checkWin();
+
+}
+
+function checkWin(){
+
+    if(gameOver)return;
+
+    if(towerData.enemyKing.hp<=0){
+
+        endGame("🏆 你赢了！");
+
+    }else if(towerData.playerKing.hp<=0){
+
+        endGame("💀 你输了");
+
+    }
+
+}
+
+function endGame(text){
+
+    gameOver=true;
+
+    document.getElementById("resultText")
+        .textContent=text;
+
+    document.getElementById("message")
+        .style.display="block";
+
+}
+
+function updateUI(){
+
+    document.getElementById("elixirText")
+        .textContent=Math.floor(playerElixir);
+
+    document.getElementById("elixirFill")
+        .style.width=
+        (playerElixir/maxElixir*100)+"%";
+
+    renderHand();
+
+}
+
+function gameLoop(now){
+
+    if(!gameOver){
+
+        playerElixir =
+            Math.min(maxElixir,
+            playerElixir+0.004);
+
+        enemyElixir =
+            Math.min(maxElixir,
+            enemyElixir+0.004);
+
+        updateUnits(now);
+
+        aiTimer++;
+
+        if(aiTimer>20){
+
+            aiTurn();
+
+            aiTimer=0;
+
+        }
+
+        updateUI();
+
+    }
+
+    requestAnimationFrame(gameLoop);
+
+}
+
+function timerLoop(){
+
+    if(gameOver)return;
+
+    gameTime--;
+
+    const min=
+        Math.floor(gameTime/60)
+        .toString()
+        .padStart(2,"0");
+
+    const sec=
+        (gameTime%60)
+        .toString()
+        .padStart(2,"0");
+
+    document.getElementById("timer")
+        .textContent=min+":"+sec;
+
+    if(gameTime<=0){
+
+        const playerHp=
+            towerData.playerKing.hp+
+            towerData.playerLeft.hp+
+            towerData.playerRight.hp;
+
+        const enemyHp=
+            towerData.enemyKing.hp+
+            towerData.enemyLeft.hp+
+            towerData.enemyRight.hp;
+
+        if(playerHp>enemyHp)
+            endGame("🏆 时间到，你获胜！");
+        else if(playerHp<enemyHp)
+            endGame("💀 时间到，你失败了");
+        else
+            endGame("🤝 平局");
+
+    }
+
+}
+
+document.getElementById("restart")
+.onclick=()=>location.reload();
+
+renderHand();
+updateTowers();
+
+setInterval(timerLoop,1000);
+
+requestAnimationFrame(gameLoop);
+
+</script>
+
 </body>
 </html>
